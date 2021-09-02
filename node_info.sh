@@ -3,10 +3,10 @@
 #!/bin/bash
 language="EN"
 raw_output=false
-node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Data
 node_tcp=$(cat $HOME/kichain/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
 status=$(kicli status --node $node_tcp --home $HOME/kichain/kicli/)
+node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Variables
 moniker=$(jq ".description.moniker" <<< $node_info | tr -d '"')
 identity=$(jq ".description.identity" <<< $node_info | tr -d '"')
@@ -89,5 +89,3 @@ else
 		echo -e ""
 	fi
 fi
-
-
