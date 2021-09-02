@@ -5,7 +5,7 @@ language="EN"
 raw_output=false
 # Data
 node_tcp=$(cat $HOME/kichain/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
-status=$(kid status --node $node_tcp --home $HOME/kichain/kid/ 2>&1)
+status=$(kid status --node $node_tcp --home $HOME/kichain/kid/ 2>&1 | jq)
 node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Variables
 moniker=$(jq ".description.moniker" <<< $node_info | tr -d '"')
