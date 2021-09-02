@@ -60,7 +60,7 @@ else
 			echo -e "Нода синхронизирована:        \e[40m\e[92mда\e[0m"
 		fi
 		echo -e "Делегировано токенов на ноду: \e[40m\e[92m$delegated\e[0m"
-		echo -e "\e[0mСила голоса:                  \e[40m\e[92m$voting_power\e[0m"
+		echo -e "Весомость голоса:                  \e[40m\e[92m$voting_power\e[0m"
 		echo -e ""
 	else
 		echo -e ""
@@ -85,7 +85,7 @@ else
 			echo -e "The node is synchronized:      \e[40m\e[92myes\e[0m"
 		fi
 		echo -e "Delegated tokens to the node:  \e[40m\e[92m$delegated\e[0m"
-		echo -e "\e[0mVoting power:                  \e[40m\e[92m$voting_power\e[0m"
+		echo -e "Voting power:                  \e[40m\e[92m$voting_power\e[0m"
 		echo -e ""
 	fi
 fi
