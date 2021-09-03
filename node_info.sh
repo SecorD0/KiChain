@@ -8,7 +8,7 @@ node_tcp=$(cat $HOME/kichain/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \
 status=$(kid status --node $node_tcp --home $HOME/kichain/kid/ 2>&1)
 node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Variables
-moniker=$(jq ".description.moniker" <<< $node_info | tr -d '"')
+moniker=$(jq ".NodeInfo.moniker" <<< $status | tr -d '"')
 identity=$(jq ".description.identity" <<< $node_info | tr -d '"')
 website=$(jq ".description.website" <<< $node_info | tr -d '"')
 details=$(jq ".description.details" <<< $node_info | tr -d '"')
