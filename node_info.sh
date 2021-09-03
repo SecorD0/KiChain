@@ -48,13 +48,13 @@ else
 		echo -e ""
 		echo -e "Публичный ключ валидатора:    \e[40m\e[92m$validator_pub_key\e[0m"
 		echo -e "Адрес валидатора:             \e[40m\e[92m$validator_address\e[0m"
-		if [ "$2" = "true" ]; then
+		if [ "$jailed" = "true" ]; then
 			echo -e "Нода в тюрьме:                \033[0;31mда\e[0m\n"
 		else
 			echo -e "Нода в тюрьме:                \e[40m\e[92mнет\e[0m"
 		fi
 		echo -e "Последний блок:               \e[40m\e[92m$latest_block_height\e[0m"
-		if [ "$2" = "true" ]; then
+		if [ "$catching_up" = "true" ]; then
 			echo -e "Нода синхронизирована:        \033[0;31mнет\e[0m"
 		else
 			echo -e "Нода синхронизирована:        \e[40m\e[92mда\e[0m"
