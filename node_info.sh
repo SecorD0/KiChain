@@ -20,7 +20,7 @@ jailed=$(jq ".jailed" <<< $node_info)
 latest_block_height=$(jq ".SyncInfo.latest_block_height" <<< $status | tr -d '"')
 catching_up=$(jq ".SyncInfo.catching_up" <<< $status)
 delegated=$((`jq ".tokens" <<< $node_info | tr -d '"'`/1000000))
-voting_power=$(jq ".validator_info.voting_power" <<< $status | tr -d '"')
+voting_power=$(jq ".ValidatorInfo.VotingPower" <<< $status | tr -d '"')
 # Output
 if [ "$2" = "true" ]; then
 	printf '{"moniker":"%s",
