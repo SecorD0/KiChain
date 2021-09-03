@@ -60,7 +60,7 @@ else
 			echo -e "Нода синхронизирована:        \e[40m\e[92mда\e[0m"
 		fi
 		echo -e "Делегировано токенов на ноду: \e[40m\e[92m$delegated\e[0m"
-		echo -e "Весомость голоса:                  \e[40m\e[92m$voting_power\e[0m"
+		echo -e "Весомость голоса:             \e[40m\e[92m$voting_power\e[0m"
 		echo -e ""
 	else
 		echo -e ""
