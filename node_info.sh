@@ -55,7 +55,11 @@ else
 		fi
 		echo -e "Последний блок:               \e[40m\e[92m$latest_block_height\e[0m"
 		if [ "$catching_up" = "true" ]; then
+			current_block=$(wget -qO- https://ki-testnet.incodes.dev/blocks | jq ".data.blocks[0].blockHeight" | tr -d '"')
+			diff=$(($current_block-$latest_block_height))
+			takes_time=$(($diff/4/60))
 			echo -e "Нода синхронизирована:        \033[0;31mнет\e[0m"
+			echo -e "Осталось нагнать:             \033[0;31m$current_block-$latest_block_height=$diff (около $takes_time мин.)\e[0m"
 		else
 			echo -e "Нода синхронизирована:        \e[40m\e[92mда\e[0m"
 		fi
@@ -73,14 +77,18 @@ else
 		echo -e ""
 		echo -e "Validator public key:          \e[40m\e[92m$validator_pub_key\e[0m"
 		echo -e "Validator address:             \e[40m\e[92m$validator_address\e[0m"
-		if [ "$2" = "true" ]; then
+		if [ "$jailed" = "true" ]; then
 			echo -e "The node in a jail:            \033[0;31myes\e[0m\n"
 		else
 			echo -e "The node in a jail:            \e[40m\e[92mno\e[0m"
 		fi
 		echo -e "Latest block height:           \e[40m\e[92m$latest_block_height\e[0m"
-		if [ "$2" = "true" ]; then
+		if [ "$catching_up" = "true" ]; then
+			current_block=$(wget -qO- https://ki-testnet.incodes.dev/blocks | jq ".data.blocks[0].blockHeight" | tr -d '"')
+			diff=$(($current_block-$latest_block_height))
+			takes_time=$(($diff/4/60))
 			echo -e "The node is synchronized:      \033[0;31mno\e[0m"
+			echo -e "It remains to catch up:        \033[0;31m$current_block-$latest_block_height=$diff (about $takes_time min.)\e[0m"
 		else
 			echo -e "The node is synchronized:      \e[40m\e[92myes\e[0m"
 		fi
