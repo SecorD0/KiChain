@@ -1,11 +1,12 @@
+#!/bin/bash
 # $1 - language (RU/EN)
 # $2 - raw JSON output (true/false)
-#!/bin/bash
 language="EN"
 raw_output=false
 # Data
-node_tcp=$(cat $HOME/kichain/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
-status=$(kid status --node $node_tcp --home $HOME/kichain/kid/ 2>&1)
+kid_dir=$(sudo systemctl cat kichaind.service | grep -oPm1 "(?<=\-\-home )([^%]+)(?=/)")
+node_tcp=$(cat "${kid_dir}/config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
+status=$(kid status --node $node_tcp --home "$kid_dir" 2>&1)
 node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Variables
 moniker=$(jq ".NodeInfo.moniker" <<< $status | tr -d '"')
@@ -14,7 +15,7 @@ website=$(jq ".description.website" <<< $node_info | tr -d '"')
 details=$(jq ".description.details" <<< $node_info | tr -d '"')
 network=$(jq ".NodeInfo.network" <<< $status | tr -d '"')
 version=$(jq ".NodeInfo.version" <<< $status | tr -d '"')
-validator_pub_key=$(kid tendermint show-validator --home $HOME/kichain/kid/ | tr -d '"')
+validator_pub_key=$(kid tendermint show-validator --home "$kid_dir" | tr -d '"')
 validator_address=$(jq ".operator_address" <<< $node_info | tr -d '"')
 jailed=$(jq ".jailed" <<< $node_info)
 latest_block_height=$(jq ".SyncInfo.latest_block_height" <<< $status | tr -d '"')
