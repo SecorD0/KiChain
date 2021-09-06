@@ -49,7 +49,7 @@ else
 		echo -e "Публичный ключ валидатора:    \e[40m\e[92m$validator_pub_key\e[0m"
 		echo -e "Адрес валидатора:             \e[40m\e[92m$validator_address\e[0m"
 		if [ "$jailed" = "true" ]; then
-			echo -e "Нода в тюрьме:                \033[0;31mда\e[0m\n"
+			echo -e "Нода в тюрьме:                \033[0;31mда\e[0m"
 		else
 			echo -e "Нода в тюрьме:                \e[40m\e[92mнет\e[0m"
 		fi
