@@ -4,8 +4,8 @@
 language="EN"
 raw_output=false
 # Data
-node_tcp=$(cat $HOME/kichain/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
-status=$(kid status --node $node_tcp --home $HOME/kichain/kid/ 2>&1)
+node_tcp=$(cat $HOME/testnet/kid/config/config.toml | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
+status=$(kid status --node $node_tcp --home $HOME/testnet/kid/ 2>&1)
 node_info=$(kid query staking validators --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$kichain_moniker\"')')
 # Variables
 moniker=$(jq ".NodeInfo.moniker" <<< $status | tr -d '"')
@@ -14,7 +14,7 @@ website=$(jq ".description.website" <<< $node_info | tr -d '"')
 details=$(jq ".description.details" <<< $node_info | tr -d '"')
 network=$(jq ".NodeInfo.network" <<< $status | tr -d '"')
 version=$(jq ".NodeInfo.version" <<< $status | tr -d '"')
-validator_pub_key=$(kid tendermint show-validator --home $HOME/kichain/kid/ | tr -d '"')
+validator_pub_key=$(kid tendermint show-validator --home $HOME/testnet/kid/ | tr -d '"')
 validator_address=$(jq ".operator_address" <<< $node_info | tr -d '"')
 jailed=$(jq ".jailed" <<< $node_info)
 latest_block_height=$(jq ".SyncInfo.latest_block_height" <<< $status | tr -d '"')
@@ -49,7 +49,7 @@ else
 		echo -e "Публичный ключ валидатора:    \e[40m\e[92m$validator_pub_key\e[0m"
 		echo -e "Адрес валидатора:             \e[40m\e[92m$validator_address\e[0m"
 		if [ "$jailed" = "true" ]; then
-			echo -e "Нода в тюрьме:                \033[0;31mда\e[0m"
+			echo -e "Нода в тюрьме:                \033[0;31mда\e[0m\n"
 		else
 			echo -e "Нода в тюрьме:                \e[40m\e[92mнет\e[0m"
 		fi
