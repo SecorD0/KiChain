@@ -1,15 +1,12 @@
 #!/bin/bash
 # $1 - language (RU/EN)
 # $2 - raw JSON output (true/false)
-language="EN"
-raw_output=false
-# Data
+# Data and variables
 kid_dir=$(sudo systemctl cat kichaind.service | grep -oPm1 "(?<=\-\-home )([^%]+)(?=/)")
 node_tcp=$(cat "${kid_dir}/config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")")
 status=$(kid status --node $node_tcp --home "$kid_dir" 2>&1)
 moniker=$(jq -r ".NodeInfo.moniker" <<< $status)
 node_info=$(kid query staking validators --node $node_tcp --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')')
-# Variables
 identity=$(jq -r ".description.identity" <<< $node_info)
 website=$(jq -r ".description.website" <<< $node_info)
 details=$(jq -r ".description.details" <<< $node_info)
