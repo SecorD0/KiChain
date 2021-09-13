@@ -1,14 +1,13 @@
 Introdution
 ---
-For make cross-chain transactions you need to:
-1) Installed KiChain kichain-t-4 node
+For make cross-chain transactions you need:
+1) Installed KiChain node (```kichain-t-4```)
 2) Installed another Cosmos node with IBC (the following is Croeseid 3.1.0)
 3) Cosmos IBC relayer
 
 Relayer installation and configuration
 ---
 Install relayer v1.0.0
-
 ```cd
 git clone https://github.com/cosmos/relayer.git
 cd relayer
@@ -20,7 +19,6 @@ Initialize the relayer config
 rly config init
 ```
 Create KiChain config file
-
 ```
 echo '{"chain-id":"kichain-t-4","rpc-addr":"https://rpc-challenge.blockchain.ki:443","account-prefix":"tki","gas-adjustment":1.5,"gas-prices":"0.025utki","trusting-period":"10m"}' > $HOME/.relayer/config/kichain_config.json
 ```
@@ -28,7 +26,7 @@ Create Cro config file
 ```
 echo '{"chain-id":"testnet-croeseid-4","rpc-addr":"'`cat "$HOME/.chain-maind/config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`'","account-prefix":"tcro","gas-adjustment":1.5,"gas-prices":"0.025basetcro","trusting-period":"10m"}'  > $HOME/.relayer/config/croeseid_config.json
 ```
-Add chain configs from JSON
+Add chain configs from JSONs
 ```
 rly chains add -f $HOME/.relayer/config/kichain_config.json
 rly chains add -f $HOME/.relayer/config/croeseid_config.json
@@ -58,7 +56,7 @@ Initialize light clients
 rly light init kichain-t-4 -f
 rly light init testnet-croeseid-4 -f
 ```
-Then we generate paths
+Then generate paths
 ```
 rly paths generate kichain-t-4 testnet-croeseid-4 kichain --port=transfer
 rly paths generate testnet-croeseid-4 kichain-t-4 cro --port=transfer
@@ -92,4 +90,8 @@ Example of successful output
 ```
 I[2021-09-12|23:44:57.052] ✔ [kichain-t-4]@{303033} - msg(0:transfer) hash(A7150C2D83EFF3B50CBAB6872B351213410B56C26E32128433B667865712EBD1)
 ```
+You can check transaction in KiChain or Cro explorer
 
+https://ki.thecodes.dev/tx/REPLACE_IT_TO_HASH
+
+https://crypto.org/explorer/croeseid4/tx/REPLACE_IT_TO_HASH
