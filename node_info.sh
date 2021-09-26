@@ -62,7 +62,7 @@ if [ "$language" = "RU" ]; then
 	t_sy3="Нода синхронизирована:        ${C_LGn}да${RES}"
 	t_del="Делегировано токенов на ноду: ${C_LGn}%.3f${RES}"
 	t_vp="Весомость голоса:             ${C_LGn}%s${RES}\n"
-# Send Pull request with new texts to add a language - https://github.com/SecorD0/Omniflix/blob/main/node_info.sh
+# Send Pull request with new texts to add a language - https://github.com/SecorD0/KiChain/blob/main/node_info.sh
 #elif [ "$language" = ".." ]; then
 else
 	t_nn="\nMoniker:                       ${C_LGn}%s${RES}"
