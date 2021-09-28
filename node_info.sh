@@ -99,7 +99,7 @@ validator_address=`jq -r ".operator_address" <<< $node_info`
 jailed=`jq -r ".jailed" <<< $node_info`
 latest_block_height=`jq -r ".SyncInfo.latest_block_height" <<< $status`
 catching_up=`jq -r ".SyncInfo.catching_up" <<< $status`
-delegated=`echo "$(jq -r ".tokens" <<< $node_info)/1000000" | bc -l`
+delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000"`
 voting_power=`jq -r ".ValidatorInfo.VotingPower" <<< $status`
 # Output
 if [ "$raw_output" = "true" ]; then
@@ -134,8 +134,8 @@ else
 	printf_n "$t_lb" "$latest_block_height"
 	if [ "$catching_up" = "true" ]; then
 		current_block=$(wget -qO- https://ki-testnet.incodes.dev/blocks | jq ".data.blocks[0].blockHeight" | tr -d '"')
-		diff=`echo "$current_block-$latest_block_height" | bc -l`
-		takes_time=`echo "$diff/4/60" | bc -l`
+		diff=`bc -l <<< "$current_block-$latest_block_height"`
+		takes_time=`bc -l <<< "$diff/4/60"`
 		printf_n "$t_sy1"
 		printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
 	else
