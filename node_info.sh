@@ -176,11 +176,11 @@ main() {
 		printf_n "$t_nv" "$node_version"
 		printf_n "$t_lb" "$latest_block_height"
 		if [ "$catching_up" = "true" ]; then
-			#local current_block=`wget -qO- "http://___/abci_info" | jq -r ".result.response.last_block_height"`
-			#local diff=`bc -l <<< "$current_block-$latest_block_height"`
-			#local takes_time=`bc -l <<< "$diff/4/60"`
+			local current_block=`wget -qO- "https://rpc-mainnet.blockchain.ki/abci_info" | jq -r ".result.response.last_block_height"`
+			local diff=`bc -l <<< "$current_block-$latest_block_height"`
+			local takes_time=`bc -l <<< "$diff/70/60"`
 			printf_n "$t_sy1"
-			#printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
+			printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
 		else
 			printf_n "$t_sy3"
 		fi
