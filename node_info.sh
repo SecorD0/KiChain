@@ -1,7 +1,16 @@
 #!/bin/bash
+# Config
+daemon="`which kicli`"
+token_name="xki"
+node_dir="$HOME/.kid/"
+wallet_name="$kichain_wallet_name"
+wallet_address="$kichain_wallet_address"
+wallet_address_variable="kichain_wallet_address"
+
 # Default variables
 language="EN"
 raw_output="false"
+
 # Options
 . <(wget -qO- https://raw.githubusercontent.com/SecorD0/utils/main/colors.sh) --
 option_value(){ echo $1 | sed -e 's%^--[^=]*=%%g; s%^-[^=]*=%%g'; }
@@ -10,7 +19,7 @@ while test $# -gt 0; do
 	-h|--help)
 		. <(wget -qO- https://raw.githubusercontent.com/SecorD0/utils/main/logo.sh)
 		echo
-		echo -e "${C_LGn}Functionality${RES}: the script shows information about KiChain node"
+		echo -e "${C_LGn}Functionality${RES}: the script shows information about a KiChain node"
 		echo
 		echo -e "Usage: script ${C_LGn}[OPTIONS]${RES}"
 		echo
@@ -23,10 +32,11 @@ while test $# -gt 0; do
 		echo -e "You can use either \"=\" or \" \" as an option and value ${C_LGn}delimiter${RES}"
 		echo
 		echo -e "${C_LGn}Useful URLs${RES}:"
-		echo -e "https://github.com/SecorD0/KiChain/blob/main/node_info.sh - script URL (you can send Pull request with new texts to add a language)"
+		echo -e "https://github.com/SecorD0/KiChain/blob/main/node_info.sh - script URL"
+		echo -e "         (you can send Pull request with new texts to add a language)"
 		echo -e "https://t.me/letskynode — node Community"
 		echo
-		return 0
+		return 0 2>/dev/null; exit 0
 		;;
 	-l*|--language*)
 		if ! grep -q "=" <<< $1; then shift; fi
@@ -42,105 +52,154 @@ while test $# -gt 0; do
 		;;
 	esac
 done
+
 # Functions
 printf_n(){ printf "$1\n" "${@:2}"; }
-# Texts
-if [ "$language" = "RU" ]; then
-	t_nn="\nНазвание ноды:                ${C_LGn}%s${RES}"
-	t_id="Keybase ключ:                 ${C_LGn}%s${RES}"
-	t_si="Сайт:                         ${C_LGn}%s${RES}"
-	t_det="Описание:                     ${C_LGn}%s${RES}"
-	t_net="Сеть:                         ${C_LGn}%s${RES}"
-	t_ver="Версия ноды:                  ${C_LGn}%s${RES}\n"
-	t_pk="Публичный ключ валидатора:    ${C_LGn}%s${RES}"
-	t_va="Адрес валидатора:             ${C_LGn}%s${RES}"
-	t_nij1="Нода в тюрьме:                ${C_LR}да${RES}"
-	t_nij2="Нода в тюрьме:                ${C_LGn}нет${RES}"
-	t_lb="Последний блок:               ${C_LGn}%s${RES}"
-	t_sy1="Нода синхронизирована:        ${C_LR}нет${RES}"
-	t_sy2="Осталось нагнать:             ${C_LR}%d-%d=%d (около %.2f мин.)${RES}"
-	t_sy3="Нода синхронизирована:        ${C_LGn}да${RES}"
-	t_del="Делегировано токенов на ноду: ${C_LGn}%.3f${RES}"
-	t_vp="Весомость голоса:             ${C_LGn}%s${RES}\n"
-# Send Pull request with new texts to add a language - https://github.com/SecorD0/KiChain/blob/main/node_info.sh
-#elif [ "$language" = ".." ]; then
-else
-	t_nn="\nMoniker:                       ${C_LGn}%s${RES}"
-	t_id="Keybase key:                   ${C_LGn}%s${RES}"
-	t_si="Website:                       ${C_LGn}%s${RES}"
-	t_det="Details:                       ${C_LGn}%s${RES}"
-	t_net="Network:                       ${C_LGn}%s${RES}"
-	t_ver="Node version:                  ${C_LGn}%s${RES}\n"
-	t_pk="Validator public key:          ${C_LGn}%s${RES}"
-	t_va="Validator address:             ${C_LGn}%s${RES}"
-	t_nij1="The node in a jail:            ${C_LR}yes${RES}"
-	t_nij2="The node in a jail:            ${C_LGn}no${RES}"
-	t_lb="Latest block height:           ${C_LGn}%s${RES}"
-	t_sy1="The node is synchronized:      ${C_LR}no${RES}"
-	t_sy2="It remains to catch up:        ${C_LR}%d-%d=%d (about %.2f min.)${RES}"
-	t_sy3="The node is synchronized:      ${C_LGn}yes${RES}"
-	t_del="Delegated tokens to the node:  ${C_LGn}%.3f${RES}"
-	t_vp="Voting power:                  ${C_LGn}%s${RES}\n"
-fi
-# Actions
-sudo apt install bc -y &>/dev/null
-kid_dir=`sudo systemctl cat kichaind.service | grep -oPm1 "(?<=\-\-home )([^%]+)(?=/)"`
-node_tcp=`cat "${kid_dir}/config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`
-status=`kid status --node "$node_tcp" --home "$kid_dir" 2>&1`
-moniker=`jq -r ".NodeInfo.moniker" <<< $status`
-node_info=`kid query staking validators --node "$node_tcp" --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')'`
-identity=`jq -r ".description.identity" <<< $node_info`
-website=`jq -r ".description.website" <<< $node_info`
-details=`jq -r ".description.details" <<< $node_info`
-network=`jq -r ".NodeInfo.network" <<< $status`
-version=`jq -r ".NodeInfo.version" <<< $status`
-validator_pub_key=`kid tendermint show-validator --home "$kid_dir"`
-validator_address=`jq -r ".operator_address" <<< $node_info`
-jailed=`jq -r ".jailed" <<< $node_info`
-latest_block_height=`jq -r ".SyncInfo.latest_block_height" <<< $status`
-catching_up=`jq -r ".SyncInfo.catching_up" <<< $status`
-delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000"`
-voting_power=`jq -r ".ValidatorInfo.VotingPower" <<< $status`
-# Output
-if [ "$raw_output" = "true" ]; then
-	printf_n '{"moniker": "%s", "identity": "%s", "website": "%s", "details": "%s", "network": "%s", "version": "%s", "validator_pub_key": "%s", "validator_address": "%s", "jailed": %b, "latest_block_height": %d, "catching_up": %b, "delegated": %.3f, "voting_power": %d}' \
+
+main() {
+	# Texts
+	if [ "$language" = "RU" ]; then
+		local t_ewa="Для просмотра баланса кошелька необходимо добавить его в систему виде переменной, поэтому ${C_LGn}введите пароль от кошелька${RES}"
+		local t_ewa_err="${C_LR}Не удалось получить адрес кошелька!${RES}"
+		local t_nn="\nНазвание ноды:              ${C_LGn}%s${RES}"
+		local t_id="Keybase ключ:               ${C_LGn}%s${RES}"
+		local t_si="Сайт:                       ${C_LGn}%s${RES}"
+		local t_det="Описание:                   ${C_LGn}%s${RES}\n"
+		
+		local t_net="Сеть:                       ${C_LGn}%s${RES}"
+		local t_ni="ID ноды:                    ${C_LGn}%s${RES}"
+		local t_nv="Версия ноды:                ${C_LGn}%s${RES}"
+		local t_lb="Последний блок:             ${C_LGn}%s${RES}"
+		local t_sy1="Нода синхронизирована:      ${C_LR}нет${RES}"
+		local t_sy2="Осталось нагнать:           ${C_LR}%d-%d=%d (около %.2f мин.)${RES}"
+		local t_sy3="Нода синхронизирована:      ${C_LGn}да${RES}"
+		
+		local t_va="\nАдрес валидатора:           ${C_LGn}%s${RES}"
+		local t_pk="Публичный ключ валидатора:  ${C_LGn}%s${RES}"
+		local t_nij1="Валидатор в тюрьме:         ${C_LR}да${RES}"
+		local t_nij2="Валидатор в тюрьме:         ${C_LGn}нет${RES}"	
+		local t_del="Делегировано токенов:       ${C_LGn}%.4f${RES} ${token_name}"
+		local t_vp="Весомость голоса:           ${C_LGn}%.4f${RES}\n"
+		
+		local t_wa="Адрес кошелька:             ${C_LGn}%s${RES}"
+		local t_bal="Баланс:                     ${C_LGn}%.4f${RES} ${token_name}\n"
+	# Send Pull request with new texts to add a language - https://github.com/SecorD0/KiChain/blob/main/node_info.sh
+	#elif [ "$language" = ".." ]; then
+	else
+		local t_ewa="To view the wallet balance, you have to add it to the system as a variable, so ${C_LGn}enter the wallet password${RES}"
+		local t_ewa_err="${C_LR}Failed to get the wallet address!${RES}"
+		local t_nn="\nMoniker:                 ${C_LGn}%s${RES}"
+		local t_id="Keybase key:             ${C_LGn}%s${RES}"
+		local t_si="Website:                 ${C_LGn}%s${RES}"
+		local t_det="Details:                 ${C_LGn}%s${RES}\n"
+		
+		local t_net="Network:                 ${C_LGn}%s${RES}"
+		local t_ni="Node ID:                 ${C_LGn}%s${RES}"
+		local t_nv="Node version:            ${C_LGn}%s${RES}"
+		local t_lb="Latest block height:     ${C_LGn}%s${RES}"
+		local t_sy1="Node is synchronized:    ${C_LR}no${RES}"
+		local t_sy2="It remains to catch up:  ${C_LR}%d-%d=%d (about %.2f min.)${RES}"
+		local t_sy3="Node is synchronized:    ${C_LGn}yes${RES}"
+		
+		local t_va="\nValidator address:       ${C_LGn}%s${RES}"
+		local t_pk="Validator public key:    ${C_LGn}%s${RES}"
+		local t_nij1="Validator in a jail:     ${C_LR}yes${RES}"
+		local t_nij2="Validator in a jail:     ${C_LGn}no${RES}"
+		local t_del="Delegated tokens:        ${C_LGn}%.4f${RES} ${token_name}"
+		local t_vp="Voting power:            ${C_LGn}%.4f${RES}\n"
+		
+		local t_wa="Wallet address:          ${C_LGn}%s${RES}"
+		local t_bal="Balance:                 ${C_LGn}%.4f${RES} ${token_name}\n"
+	fi
+	
+	# Actions
+	sudo apt install bc -y &>/dev/null
+	if [ -n "$wallet_name" ] && [ ! -n "$wallet_address" ]; then
+		printf_n "$t_ewa"
+		local wallet_address=`$daemon keys show "$wallet_name" -a`
+		if [ -n "$wallet_address" ]; then
+			. <(wget -qO- https://raw.githubusercontent.com/SecorD0/utils/main/miscellaneous/insert_variable.sh) -n "$wallet_address_variable" -v "$wallet_address"
+		else
+			printf_n "$t_ewa_err"
+		fi
+	fi
+	local node_tcp=`cat "${node_dir}config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`
+	local status=`$daemon status --node "$node_tcp" 2>&1`
+	local moniker=`jq -r ".node_info.moniker" <<< $status`
+	local node_info=`$daemon query staking validators --node "$node_tcp" --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')'`
+	local identity=`jq -r ".description.identity" <<< $node_info`
+	local website=`jq -r ".description.website" <<< $node_info`
+	local details=`jq -r ".description.details" <<< $node_info`
+
+	local network=`jq -r ".node_info.network" <<< $status`
+	local node_id=`jq -r ".node_info.id" <<< $status`
+	local node_version=`$daemon version`
+	local latest_block_height=`jq -r ".sync_info.latest_block_height" <<< $status`
+	local catching_up=`jq -r ".sync_info.catching_up" <<< $status`
+
+	local validator_address=`jq -r ".operator_address" <<< $node_info`
+	local validator_pub_key=`kid tendermint show-validator`
+	local jailed=`jq -r ".jailed" <<< $node_info`
+	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000"`
+	local voting_power=`jq -r ".validator_info.voting_power" <<< $status`
+	if [ -n "$wallet_address" ]; then
+		local balance=`bc -l <<< "$($daemon query account "$wallet_address" -o json --node "$node_tcp" | jq -r ".balances[0].amount")/1000000"`
+	fi
+
+	# Output
+	if [ "$raw_output" = "true" ]; then
+		printf_n '{"moniker": "%s", "identity": "%s", "website": "%s", "details": "%s", "network": "%s", "node_id": "%s", "node_version": "%s", "latest_block_height": %d, "catching_up": %b, "validator_address": "%s", "validator_pub_key": "%s", "jailed": %b, "delegated": %.4f, "voting_power": %.4f, "wallet_address": "%s", "balance": %.4f}' \
 "$moniker" \
 "$identity" \
 "$website" \
 "$details" \
 "$network" \
-"$version" \
-"$validator_pub_key" \
-"$validator_address" \
-"$jailed" \
+"$node_id" \
+"$node_version" \
 "$latest_block_height" \
 "$catching_up" \
+"$validator_address" \
+"$validator_pub_key" \
+"$jailed" \
 "$delegated" \
-"$voting_power"
-else
-	printf_n "$t_nn" "$moniker"
-	printf_n "$t_id" "$identity"
-	printf_n "$t_si" "$website"
-	printf_n "$t_det" "$details"
-	printf_n "$t_net" "$network"
-	printf_n "$t_ver" "$version"
-	printf_n "$t_pk" "$validator_pub_key"
-	printf_n "$t_va" "$validator_address"
-	if [ "$jailed" = "true" ]; then
-		printf_n "$t_nij1"
+"$voting_power" \
+"$wallet_address" \
+"$balance" 2>/dev/null
 	else
-		printf_n "$t_nij2"
+		printf_n "$t_nn" "$moniker"
+		printf_n "$t_id" "$identity"
+		printf_n "$t_si" "$website"
+		printf_n "$t_det" "$details"
+		
+		printf_n "$t_net" "$network"
+		printf_n "$t_ni" "$node_id"
+		printf_n "$t_nv" "$node_version"
+		printf_n "$t_lb" "$latest_block_height"
+		if [ "$catching_up" = "true" ]; then
+			#local current_block=`wget -qO- "http://___/abci_info" | jq -r ".result.response.last_block_height"`
+			#local diff=`bc -l <<< "$current_block-$latest_block_height"`
+			#local takes_time=`bc -l <<< "$diff/4/60"`
+			printf_n "$t_sy1"
+			#printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
+		else
+			printf_n "$t_sy3"
+		fi
+		
+		printf_n "$t_va" "$validator_address"
+		printf_n "$t_pk" "$validator_pub_key"
+		if [ "$jailed" = "true" ]; then
+			printf_n "$t_nij1"
+		else
+			printf_n "$t_nij2"
+		fi
+		printf_n "$t_del" "$delegated"
+		printf_n "$t_vp" "$voting_power"
+		
+		if [ -n "$wallet_address" ]; then
+			printf_n "$t_wa" "$wallet_address"
+			printf_n "$t_bal" "$balance"
+		fi
 	fi
-	printf_n "$t_lb" "$latest_block_height"
-	if [ "$catching_up" = "true" ]; then
-		current_block=$(wget -qO- https://ki-testnet.incodes.dev/blocks | jq ".data.blocks[0].blockHeight" | tr -d '"')
-		diff=`bc -l <<< "$current_block-$latest_block_height"`
-		takes_time=`bc -l <<< "$diff/4/60"`
-		printf_n "$t_sy1"
-		printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
-	else
-		printf_n "$t_sy3"
-	fi
-	printf_n "$t_del" "$delegated"
-	printf_n "$t_vp" "$voting_power"
-fi
+}
+
+main
