@@ -56,7 +56,6 @@ done
 
 # Functions
 printf_n(){ printf "$1\n" "${@:2}"; }
-
 main() {
 	# Texts
 	if [ "$language" = "RU" ]; then
