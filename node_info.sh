@@ -143,7 +143,7 @@ main() {
 	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000"`
 	local voting_power=`jq -r ".validator_info.voting_power" <<< $status`
 	if [ -n "$wallet_address" ]; then
-		local balance=`bc -l <<< "$($daemon query account "$wallet_address" -o json --node "$node_tcp" | jq -r ".balances[0].amount")/1000000"`
+		local balance=`bc -l <<< "$($daemon query account "$wallet_address" -o json --node "https://rpc-mainnet.blockchain.ki/" | jq -r ".balances[0].amount")/1000000"`
 	fi
 
 	# Output
