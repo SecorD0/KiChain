@@ -1,7 +1,8 @@
 #!/bin/bash
 # Config
-daemon="`which kicli`"
-token_name="xki"
+daemon="`which kid`"
+token_name="umee"
+current_rpc="https://rpc-mainnet.blockchain.ki/"
 node_dir="$HOME/.kid/"
 wallet_name="$kichain_wallet_name"
 wallet_address="$kichain_wallet_address"
@@ -123,27 +124,28 @@ main() {
 			printf_n "$t_ewa_err"
 		fi
 	fi
+	
 	local node_tcp=`cat "${node_dir}config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`
 	local status=`$daemon status --node "$node_tcp" 2>&1`
-	local moniker=`jq -r ".node_info.moniker" <<< $status`
-	local node_info=`$daemon query staking validators --node "$node_tcp" --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')'`
+	local moniker=`jq -r ".NodeInfo.moniker" <<< $status`
+	local node_info=`$daemon query staking validators --node "$node_tcp" --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')'`
 	local identity=`jq -r ".description.identity" <<< $node_info`
 	local website=`jq -r ".description.website" <<< $node_info`
 	local details=`jq -r ".description.details" <<< $node_info`
-
-	local network=`jq -r ".node_info.network" <<< $status`
-	local node_id=`jq -r ".node_info.id" <<< $status`
-	local node_version=`$daemon version`
-	local latest_block_height=`jq -r ".sync_info.latest_block_height" <<< $status`
-	local catching_up=`jq -r ".sync_info.catching_up" <<< $status`
-
+	
+	local network=`jq -r ".NodeInfo.network" <<< $status`
+	local node_id=`jq -r ".NodeInfo.id" <<< $status`
+	local node_version=`$daemon version 2>&1`
+	local latest_block_height=`jq -r ".SyncInfo.latest_block_height" <<< $status`
+	local catching_up=`jq -r ".SyncInfo.catching_up" <<< $status`
+	
 	local validator_address=`jq -r ".operator_address" <<< $node_info`
-	local validator_pub_key=`kid tendermint show-validator`
+	local validator_pub_key=`$daemon tendermint show-validator`
 	local jailed=`jq -r ".jailed" <<< $node_info`
-	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000"`
-	local voting_power=`jq -r ".validator_info.voting_power" <<< $status`
+	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000" 2>/dev/null`
+	local voting_power=`jq -r ".ValidatorInfo.VotingPower" <<< $status`
 	if [ -n "$wallet_address" ]; then
-		local balance=`bc -l <<< "$($daemon query account "$wallet_address" -o json --node "$node_tcp" jq -r ".value.coins[0].amount")/1000000"`
+		local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -o json --node "$node_tcp" | jq -r ".balances[0].amount")/1000000"`
 	fi
 
 	# Output
@@ -176,9 +178,9 @@ main() {
 		printf_n "$t_nv" "$node_version"
 		printf_n "$t_lb" "$latest_block_height"
 		if [ "$catching_up" = "true" ]; then
-			local current_block=`wget -qO- "https://rpc-mainnet.blockchain.ki/abci_info" | jq -r ".result.response.last_block_height"`
+			local current_block=`wget -qO- "${current_rpc}abci_info" | jq -r ".result.response.last_block_height"`
 			local diff=`bc -l <<< "$current_block-$latest_block_height"`
-			local takes_time=`bc -l <<< "$diff/70/60"`
+			local takes_time=`bc -l <<< "$diff/4/60"`
 			printf_n "$t_sy1"
 			printf_n "$t_sy2" "$current_block" "$latest_block_height" "$diff" "$takes_time"		
 		else
