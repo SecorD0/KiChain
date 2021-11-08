@@ -1,7 +1,7 @@
 #!/bin/bash
 # Config
 daemon="`which kid`"
-token_name="umee"
+token_name="xki"
 current_rpc="https://rpc-mainnet.blockchain.ki/"
 node_dir="$HOME/.kid/"
 wallet_name="$kichain_wallet_name"
