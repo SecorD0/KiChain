@@ -24,7 +24,7 @@ echo '{"chain-id":"kichain-t-4","rpc-addr":"https://rpc-challenge.blockchain.ki:
 ```
 Create Cro config file
 ```
-echo '{"chain-id":"testnet-croeseid-4","rpc-addr":"'`cat "$HOME/.chain-maind/config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`'","account-prefix":"tcro","gas-adjustment":1.5,"gas-prices":"0.025basetcro","trusting-period":"10m"}'  > $HOME/.relayer/config/croeseid_config.json
+echo '{"chain-id":"testnet-croeseid-4","rpc-addr":"'`grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")" "$HOME/.chain-maind/config/config.toml"`'","account-prefix":"tcro","gas-adjustment":1.5,"gas-prices":"0.025basetcro","trusting-period":"10m"}'  > $HOME/.relayer/config/croeseid_config.json
 ```
 Add chain configs from JSONs
 ```
