@@ -124,7 +124,7 @@ main() {
 		fi
 	fi
 	
-	local node_tcp=`cat "${node_dir}config/config.toml" | grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")"`
+	local node_tcp=`grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")" "${node_dir}config/config.toml"`
 	local status=`$daemon status --node "$node_tcp" 2>&1`
 	local moniker=`jq -r ".NodeInfo.moniker" <<< $status`
 	local node_info=`$daemon query staking validators --node "$node_tcp" --limit 1500 --output json | jq -r '.validators[] | select(.description.moniker=='\"$moniker\"')'`
