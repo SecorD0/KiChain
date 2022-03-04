@@ -138,29 +138,29 @@ main() {
 	fi
 	local local_rpc=`grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")" "${node_dir}config/config.toml"`
 	local status=`$daemon status --node "$local_rpc" 2>&1`
-	local moniker=`jq -r ".NodeInfo.moniker" <<< $status`
+	local moniker=`jq -r ".NodeInfo.moniker" <<< "$status"`
 	local node_info=`$daemon query staking validators --node "$local_rpc" --limit 10000 -oj | jq -r '.validators[] | select(.operator_address=='\"$validator_address\"')'`
-	local identity=`jq -r ".description.identity" <<< $node_info`
-	local website=`jq -r ".description.website" <<< $node_info`
-	local details=`jq -r ".description.details" <<< $node_info`
+	local identity=`jq -r ".description.identity" <<< "$node_info"`
+	local website=`jq -r ".description.website" <<< "$node_info"`
+	local details=`jq -r ".description.details" <<< "$node_info"`
 
-	local network=`jq -r ".NodeInfo.network" <<< $status`
-	local node_id=`jq -r ".NodeInfo.id" <<< $status`
+	local network=`jq -r ".NodeInfo.network" <<< "$status"`
+	local node_id=`jq -r ".NodeInfo.id" <<< "$status"`
 	local node_version=`$daemon version`
-	local latest_block_height=`jq -r ".SyncInfo.latest_block_height" <<< $status`
-	local catching_up=`jq -r ".SyncInfo.catching_up" <<< $status`
+	local latest_block_height=`jq -r ".SyncInfo.latest_block_height" <<< "$status"`
+	local catching_up=`jq -r ".SyncInfo.catching_up" <<< "$status"`
 	
-	local validator_moniker=`jq -r ".description.moniker" <<< $node_info`
+	local validator_moniker=`jq -r ".description.moniker" <<< "$node_info"`
 	if [ -n "$validator_address" ]; then local explorer_url="${explorer_url_template}${validator_address}"; fi
 	local validator_pub_key=`$daemon tendermint show-validator | tr "\"" "'"`
-	local jailed=`jq -r ".jailed" <<< $node_info`
-	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000000000000000"`
-	local voting_power=`bc -l <<< "$(jq -r ".ValidatorInfo.VotingPower" <<< $status)/1000000000000"`
+	local jailed=`jq -r ".jailed" <<< "$node_info"`
+	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< "$node_info")/1000000"`
+	local voting_power=`jq -r ".ValidatorInfo.VotingPower" <<< "$status"`
 	if [ -n "$wallet_address" ]; then
 		if grep -q ":" <<< `echo "$global_rpc" | sed -e "s%http://%%; s%https://%%; s%tcp://%%"`; then
-			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj --node "$global_rpc" | jq -r ".balances[0].amount")/1000000000000000000"`
+			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj --node "$global_rpc" | jq -r ".balances[0].amount")/1000000"`
 		else
-			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj | jq -r ".balances[0].amount")/1000000000000000000"`
+			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj | jq -r ".balances[0].amount")/1000000"`
 		fi
 	fi
 
