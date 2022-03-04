@@ -157,7 +157,7 @@ main() {
 	local delegated=`bc -l <<< "$(jq -r ".tokens" <<< $node_info)/1000000000000000000"`
 	local voting_power=`bc -l <<< "$(jq -r ".ValidatorInfo.VotingPower" <<< $status)/1000000000000"`
 	if [ -n "$wallet_address" ]; then
-		if grep ":" <<< `echo "$global_rpc" | sed -e "s%http://%%; s%https://%%; s%tcp://%%"`; then
+		if grep -q ":" <<< `echo "$global_rpc" | sed -e "s%http://%%; s%https://%%; s%tcp://%%"`; then
 			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj --node "$global_rpc" | jq -r ".balances[0].amount")/1000000000000000000"`
 		else
 			local balance=`bc -l <<< "$($daemon query bank balances "$wallet_address" -oj | jq -r ".balances[0].amount")/1000000000000000000"`
