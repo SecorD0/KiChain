@@ -136,6 +136,7 @@ main() {
 		fi
 		unset password
 	fi
+	
 	local local_rpc=`grep -oPm1 "(?<=^laddr = \")([^%]+)(?=\")" "${node_dir}config/config.toml"`
 	local status=`$daemon status --node "$local_rpc" 2>&1`
 	local moniker=`jq -r ".NodeInfo.moniker" <<< "$status"`
