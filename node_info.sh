@@ -28,8 +28,8 @@ while test $# -gt 0; do
 		echo -e "Usage: script ${C_LGn}[OPTIONS]${RES}"
 		echo
 		echo -e "${C_LGn}Options${RES}:"
-		echo -e "  -h, --help               show help page"
-		echo -e "  -l, --language LANGUAGE  use the LANGUAGE for texts"
+		echo -e "  -h,  --help               show help page"
+		echo -e "  -l,  --language LANGUAGE  use the LANGUAGE for texts"
 		echo -e "                           LANGUAGE is '${C_LGn}EN${RES}' (default), '${C_LGn}RU${RES}'"
 		echo -e "  -ro, --raw-output        the raw JSON output"
 		echo
